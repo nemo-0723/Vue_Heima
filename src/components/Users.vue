@@ -44,7 +44,7 @@
                         <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteUser(scope.row.id)" ></el-button>
                         <!-- 分配角色按钮 -->
                         <el-tooltip  effect="dark" content="分配角色" placement="top" :enterable="false">
-                            <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+                            <el-button type="warning" icon="el-icon-setting" size="mini" @click="setRolesDialog(scope.row)"></el-button>
                         </el-tooltip>
                     </template>
                 </el-table-column>
@@ -101,6 +101,24 @@
             <span slot="footer" class="dialog-footer">
                 <el-button @click="changeUserDialogVisible = false">取 消</el-button>
                 <el-button type="primary" @click="changeUser">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 分配角色的弹窗 -->
+        <el-dialog title="分配角色" :visible.sync="setRolesDialogVisible" width="50%" @close="setRoleDialogClosed">
+            <!-- 内容主体区 -->
+            <p>当前的用户：{{currentUser.username}}</p>
+            <p>当前的角色：{{currentUser.role_name}}</p>
+            <p>分配新角色：
+                <el-select  v-model="selectRoleId" clearable >
+                    <el-option v-for="item in rolesList" :key="item.id" :label="item.roleName"  :value="item.id">
+                    </el-option>
+                </el-select>
+            </p>
+            <!-- 按钮区 -->
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="setRolesDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="setRole">确 定</el-button>
             </span>
         </el-dialog>
 
@@ -172,6 +190,13 @@ export default {
                 mobile:'',
                 id:0,
             },
+            //控制分配角色弹窗是否显示
+            setRolesDialogVisible:false,
+            //分配角色时的当前用户
+            currentUser:{},
+            //所有角色列表
+            rolesList:[],
+            selectRoleId: ''
         }
     },
     created(){
@@ -288,7 +313,36 @@ export default {
                 });          
             });
         },
-        //
+        //控制分配角色弹窗是否显示事件
+        setRolesDialog(user){
+            this.currentUser=user;
+            //获取所有角色列表
+            this.getRolesList();
+            this.setRolesDialogVisible=true;
+        },
+        //获取角色列表
+        async getRolesList(){
+            const {data:res} = await this.$http.get('roles');
+            if(res.meta.status!==200) return this.$message.error('获取角色列表数据失败')
+            this.rolesList=res.data;
+        },
+        //分配角色
+        async setRole(){
+            const {data:res}=await this.$http.put(`users/${this.currentUser.id}/role`,
+                {rid:this.selectRoleId}
+            )
+            if(res.meta.status!==200) return this.$message.error(res.meta.msg) 
+            this.$message.success('分配角色成功')
+            this.setRolesDialogVisible=false;
+            this.getUserList()
+            
+            
+        },
+        //分配角色的弹窗关闭事件
+        setRoleDialogClosed(){
+            this.selectRoleId='';
+            this.currentUser={}
+        }
 
 
     }
