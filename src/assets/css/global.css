@@ -19,3 +19,10 @@ html,body,#app{
 .el-pagination{
     margin-top: 15px;
 }
+.el-cascader-panel{
+    height: 200px;
+}
+/* 隐藏横向滚动条 */
+.el-scrollbar__wrap{
+    overflow-x: hidden;
+  }
