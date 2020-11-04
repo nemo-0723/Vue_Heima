@@ -137,7 +137,7 @@ export default {
             },
             //选中的父级分类的Id数组
             selectedKeys:[],
-            //级联选择器是否清空
+           
             
         }
     },
